@@ -10,7 +10,7 @@
   --line: rgba(18, 36, 31, 0.12);
   --walmart: #0071ce;
   --target: #cc0000;
-  --hyvee: #d41c2b;
+  --aldi: #00005f;
   --best-glow: #2f8f6b;
   --font-display: "Syne", sans-serif;
   --font-body: "Manrope", sans-serif;
@@ -444,8 +444,8 @@ body {
   background: var(--target);
 }
 
-.store-hyvee {
-  background: #8b1e26;
+.store-aldi {
+  background: var(--aldi);
 }
 
 .result-list {

@@ -1,6 +1,6 @@
 # ROC Aisle
 
-Rochester, MN grocery price helper. Paste a shopping list and get a per-item recommendation for **Walmart**, **Target**, or **Hy-Vee** based on price — plus a split-store trip plan.
+Rochester, MN grocery price helper. Paste a shopping list and get a per-item recommendation for **Walmart**, **Target**, or **Aldi** based on price — plus a split-store trip plan.
 
 ## Run locally
 
@@ -37,7 +37,10 @@ Push to `main` and the Actions workflow deploys to:
 
 ## Live price experiment (Apify)
 
-See [docs/APIFY_EXPERIMENT.md](docs/APIFY_EXPERIMENT.md) for a ~$1–5 Walmart + Target probe using free Apify credits.
+See [docs/APIFY_EXPERIMENT.md](docs/APIFY_EXPERIMENT.md).
+
+**Working today:** Instacart ZIP-aware Aldi prices for `55901`.  
+**Blocked on free plan:** Walmart ZIP scrapers (PerimeterX), Target ZIP/RedSky scrapers (403/captcha).
 
 ```bash
 cp .env.example .env   # add APIFY_TOKEN

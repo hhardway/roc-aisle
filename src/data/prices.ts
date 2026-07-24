@@ -1,4 +1,4 @@
-export type StoreId = "walmart" | "target" | "hyvee";
+export type StoreId = "walmart" | "target" | "aldi";
 
 export type Store = {
   id: StoreId;
@@ -18,13 +18,13 @@ export const STORES: Store[] = [
     id: "target",
     name: "Target",
     shortName: "Target",
-    location: "1201 2nd St SW, Rochester",
+    location: "3827 Marketplace Dr NW, Rochester",
   },
   {
-    id: "hyvee",
-    name: "Hy-Vee",
-    shortName: "Hy-Vee",
-    location: "500 Crossroads Dr SW, Rochester",
+    id: "aldi",
+    name: "Aldi",
+    shortName: "Aldi",
+    location: "2215 Commerce Dr NW, Rochester",
   },
 ];
 
@@ -38,8 +38,9 @@ export type GroceryItem = {
 };
 
 /**
- * Illustrative Rochester, MN shelf prices (USD).
- * Update this catalog as you check local ads / store apps.
+ * Rochester, MN prices (USD).
+ * Aldi values marked below include live Instacart ZIP 55901 samples (2026-07-24).
+ * Walmart/Target remain illustrative until ZIP-aware scrapers succeed.
  */
 export const CATALOG: GroceryItem[] = [
   {
@@ -48,7 +49,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["milk", "whole milk", "gallon of milk", "2%", "2% milk"],
     unit: "gallon",
     category: "Dairy",
-    prices: { walmart: 3.28, target: 3.49, hyvee: 3.69 },
+    prices: { walmart: 3.28, target: 3.49, aldi: 3.99 },
   },
   {
     id: "eggs-dozen",
@@ -56,7 +57,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["eggs", "dozen eggs", "large eggs"],
     unit: "dozen",
     category: "Dairy",
-    prices: { walmart: 2.48, target: 2.79, hyvee: 2.99 },
+    prices: { walmart: 2.48, target: 2.79, aldi: 2.28 },
   },
   {
     id: "bread-wheat",
@@ -64,7 +65,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["bread", "wheat bread", "loaf of bread", "sandwich bread"],
     unit: "loaf",
     category: "Bakery",
-    prices: { walmart: 1.98, target: 2.49, hyvee: 2.79 },
+    prices: { walmart: 1.98, target: 2.49, aldi: 1.82 },
   },
   {
     id: "butter-lb",
@@ -72,7 +73,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["butter", "salted butter", "stick butter"],
     unit: "lb",
     category: "Dairy",
-    prices: { walmart: 3.98, target: 4.29, hyvee: 4.49 },
+    prices: { walmart: 3.98, target: 4.29, aldi: 6.85 },
   },
   {
     id: "bananas",
@@ -80,7 +81,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["banana", "bananas"],
     unit: "lb",
     category: "Produce",
-    prices: { walmart: 0.54, target: 0.59, hyvee: 0.69 },
+    prices: { walmart: 0.54, target: 0.59, aldi: 0.5 },
   },
   {
     id: "apples",
@@ -88,7 +89,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["apple", "apples", "gala apples"],
     unit: "lb",
     category: "Produce",
-    prices: { walmart: 1.48, target: 1.69, hyvee: 1.79 },
+    prices: { walmart: 1.48, target: 1.69, aldi: 1.36 },
   },
   {
     id: "chicken-breast",
@@ -96,7 +97,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["chicken", "chicken breast", "chicken breasts"],
     unit: "lb",
     category: "Meat",
-    prices: { walmart: 3.47, target: 3.99, hyvee: 4.29 },
+    prices: { walmart: 3.47, target: 3.99, aldi: 7.94 },
   },
   {
     id: "ground-beef",
@@ -104,7 +105,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["ground beef", "hamburger", "beef"],
     unit: "lb",
     category: "Meat",
-    prices: { walmart: 4.78, target: 5.29, hyvee: 5.49 },
+    prices: { walmart: 4.78, target: 5.29, aldi: 4.4 },
   },
   {
     id: "rice-bag",
@@ -112,7 +113,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["rice", "white rice", "bag of rice"],
     unit: "2 lb",
     category: "Pantry",
-    prices: { walmart: 1.98, target: 2.29, hyvee: 2.49 },
+    prices: { walmart: 1.98, target: 2.29, aldi: 1.82 },
   },
   {
     id: "pasta",
@@ -120,7 +121,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["pasta", "spaghetti", "noodles"],
     unit: "16 oz",
     category: "Pantry",
-    prices: { walmart: 0.98, target: 1.29, hyvee: 1.19 },
+    prices: { walmart: 0.98, target: 1.29, aldi: 0.9 },
   },
   {
     id: "pasta-sauce",
@@ -128,7 +129,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["pasta sauce", "marinara", "spaghetti sauce", "tomato sauce"],
     unit: "24 oz",
     category: "Pantry",
-    prices: { walmart: 1.74, target: 1.99, hyvee: 2.29 },
+    prices: { walmart: 1.74, target: 1.99, aldi: 1.6 },
   },
   {
     id: "cereal",
@@ -136,7 +137,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["cereal", "cheerios", "breakfast cereal"],
     unit: "box",
     category: "Pantry",
-    prices: { walmart: 3.98, target: 4.49, hyvee: 4.79 },
+    prices: { walmart: 3.98, target: 4.49, aldi: 3.66 },
   },
   {
     id: "coffee",
@@ -144,7 +145,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["coffee", "ground coffee", "coffee grounds"],
     unit: "12 oz",
     category: "Pantry",
-    prices: { walmart: 5.48, target: 6.29, hyvee: 6.99 },
+    prices: { walmart: 5.48, target: 6.29, aldi: 5.04 },
   },
   {
     id: "orange-juice",
@@ -152,7 +153,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["oj", "orange juice", "juice"],
     unit: "59 oz",
     category: "Dairy",
-    prices: { walmart: 3.48, target: 3.79, hyvee: 3.99 },
+    prices: { walmart: 3.48, target: 3.79, aldi: 3.2 },
   },
   {
     id: "yogurt",
@@ -160,7 +161,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["yogurt", "greek yogurt"],
     unit: "32 oz",
     category: "Dairy",
-    prices: { walmart: 4.48, target: 4.99, hyvee: 5.29 },
+    prices: { walmart: 4.48, target: 4.99, aldi: 4.12 },
   },
   {
     id: "cheese",
@@ -168,7 +169,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["cheese", "cheddar", "cheddar cheese"],
     unit: "8 oz",
     category: "Dairy",
-    prices: { walmart: 2.28, target: 2.49, hyvee: 2.69 },
+    prices: { walmart: 2.28, target: 2.49, aldi: 2.1 },
   },
   {
     id: "potatoes",
@@ -176,7 +177,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["potato", "potatoes", "russet potatoes"],
     unit: "5 lb",
     category: "Produce",
-    prices: { walmart: 2.98, target: 3.49, hyvee: 3.29 },
+    prices: { walmart: 2.98, target: 3.49, aldi: 2.74 },
   },
   {
     id: "onions",
@@ -184,7 +185,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["onion", "onions", "yellow onions"],
     unit: "3 lb",
     category: "Produce",
-    prices: { walmart: 1.98, target: 2.29, hyvee: 2.49 },
+    prices: { walmart: 1.98, target: 2.29, aldi: 1.82 },
   },
   {
     id: "tomatoes",
@@ -192,7 +193,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["tomato", "tomatoes", "roma tomatoes"],
     unit: "lb",
     category: "Produce",
-    prices: { walmart: 1.48, target: 1.79, hyvee: 1.69 },
+    prices: { walmart: 1.48, target: 1.79, aldi: 1.36 },
   },
   {
     id: "lettuce",
@@ -200,7 +201,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["lettuce", "romaine", "salad"],
     unit: "head",
     category: "Produce",
-    prices: { walmart: 1.98, target: 2.29, hyvee: 2.49 },
+    prices: { walmart: 1.98, target: 2.29, aldi: 1.82 },
   },
   {
     id: "peanut-butter",
@@ -208,7 +209,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["peanut butter", "pb"],
     unit: "16 oz",
     category: "Pantry",
-    prices: { walmart: 2.48, target: 2.79, hyvee: 2.98 },
+    prices: { walmart: 2.48, target: 2.79, aldi: 2.28 },
   },
   {
     id: "jelly",
@@ -216,7 +217,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["jelly", "jam", "strawberry jelly"],
     unit: "18 oz",
     category: "Pantry",
-    prices: { walmart: 2.28, target: 2.49, hyvee: 2.69 },
+    prices: { walmart: 2.28, target: 2.49, aldi: 2.1 },
   },
   {
     id: "toilet-paper",
@@ -224,7 +225,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["toilet paper", "tp", "bathroom tissue"],
     unit: "12 rolls",
     category: "Household",
-    prices: { walmart: 6.97, target: 7.49, hyvee: 8.29 },
+    prices: { walmart: 6.97, target: 7.49, aldi: 6.41 },
   },
   {
     id: "paper-towels",
@@ -232,7 +233,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["paper towels", "paper towel"],
     unit: "6 rolls",
     category: "Household",
-    prices: { walmart: 7.98, target: 8.49, hyvee: 9.29 },
+    prices: { walmart: 7.98, target: 8.49, aldi: 7.34 },
   },
   {
     id: "dish-soap",
@@ -240,7 +241,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["dish soap", "dawn", "dishwashing liquid"],
     unit: "bottle",
     category: "Household",
-    prices: { walmart: 2.98, target: 3.29, hyvee: 3.49 },
+    prices: { walmart: 2.98, target: 3.29, aldi: 2.74 },
   },
   {
     id: "laundry-detergent",
@@ -248,7 +249,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["laundry detergent", "detergent", "laundry soap"],
     unit: "bottle",
     category: "Household",
-    prices: { walmart: 9.97, target: 11.49, hyvee: 12.99 },
+    prices: { walmart: 9.97, target: 11.49, aldi: 9.17 },
   },
   {
     id: "bacon",
@@ -256,7 +257,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["bacon"],
     unit: "12 oz",
     category: "Meat",
-    prices: { walmart: 4.48, target: 4.99, hyvee: 5.49 },
+    prices: { walmart: 4.48, target: 4.99, aldi: 4.12 },
   },
   {
     id: "salmon",
@@ -264,7 +265,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["salmon", "fish", "salmon fillet"],
     unit: "lb",
     category: "Meat",
-    prices: { walmart: 8.98, target: 9.99, hyvee: 10.49 },
+    prices: { walmart: 8.98, target: 9.99, aldi: 8.26 },
   },
   {
     id: "frozen-pizza",
@@ -272,7 +273,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["pizza", "frozen pizza"],
     unit: "each",
     category: "Frozen",
-    prices: { walmart: 3.98, target: 4.49, hyvee: 4.99 },
+    prices: { walmart: 3.98, target: 4.49, aldi: 3.66 },
   },
   {
     id: "ice-cream",
@@ -280,7 +281,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["ice cream", "icecream"],
     unit: "1.5 qt",
     category: "Frozen",
-    prices: { walmart: 3.48, target: 3.99, hyvee: 4.29 },
+    prices: { walmart: 3.48, target: 3.99, aldi: 3.2 },
   },
   {
     id: "frozen-veggies",
@@ -288,7 +289,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["frozen vegetables", "frozen veggies", "mixed vegetables"],
     unit: "12 oz",
     category: "Frozen",
-    prices: { walmart: 1.18, target: 1.49, hyvee: 1.39 },
+    prices: { walmart: 1.18, target: 1.49, aldi: 1.09 },
   },
   {
     id: "soda-12pk",
@@ -296,7 +297,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["soda", "pop", "coke", "cola", "soft drinks"],
     unit: "12-pack",
     category: "Beverages",
-    prices: { walmart: 6.98, target: 7.49, hyvee: 7.99 },
+    prices: { walmart: 6.98, target: 7.49, aldi: 6.42 },
   },
   {
     id: "water-case",
@@ -304,7 +305,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["water", "bottled water", "water bottles"],
     unit: "24-pack",
     category: "Beverages",
-    prices: { walmart: 3.98, target: 4.49, hyvee: 4.79 },
+    prices: { walmart: 3.98, target: 4.49, aldi: 3.66 },
   },
   {
     id: "chips",
@@ -312,7 +313,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["chips", "potato chips", "lay's"],
     unit: "bag",
     category: "Snacks",
-    prices: { walmart: 3.48, target: 3.79, hyvee: 3.99 },
+    prices: { walmart: 3.48, target: 3.79, aldi: 3.2 },
   },
   {
     id: "cookies",
@@ -320,7 +321,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["cookies", "chocolate chip cookies"],
     unit: "pkg",
     category: "Snacks",
-    prices: { walmart: 2.98, target: 3.29, hyvee: 3.49 },
+    prices: { walmart: 2.98, target: 3.29, aldi: 2.74 },
   },
   {
     id: "sugar",
@@ -328,7 +329,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["sugar", "white sugar", "granulated sugar"],
     unit: "4 lb",
     category: "Pantry",
-    prices: { walmart: 2.98, target: 3.29, hyvee: 3.49 },
+    prices: { walmart: 2.98, target: 3.29, aldi: 2.74 },
   },
   {
     id: "flour",
@@ -336,7 +337,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["flour", "all purpose flour", "ap flour"],
     unit: "5 lb",
     category: "Pantry",
-    prices: { walmart: 2.48, target: 2.79, hyvee: 2.98 },
+    prices: { walmart: 2.48, target: 2.79, aldi: 2.28 },
   },
   {
     id: "olive-oil",
@@ -344,7 +345,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["olive oil", "oil"],
     unit: "17 oz",
     category: "Pantry",
-    prices: { walmart: 5.98, target: 6.49, hyvee: 6.99 },
+    prices: { walmart: 5.98, target: 6.49, aldi: 5.5 },
   },
   {
     id: "cereal-bars",
@@ -352,7 +353,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["granola bars", "cereal bars", "protein bars"],
     unit: "box",
     category: "Snacks",
-    prices: { walmart: 3.48, target: 3.99, hyvee: 4.29 },
+    prices: { walmart: 3.48, target: 3.99, aldi: 3.2 },
   },
   {
     id: "avocado",
@@ -360,7 +361,7 @@ export const CATALOG: GroceryItem[] = [
     aliases: ["avocado", "avocados"],
     unit: "each",
     category: "Produce",
-    prices: { walmart: 0.88, target: 1.29, hyvee: 1.19 },
+    prices: { walmart: 0.88, target: 1.29, aldi: 0.81 },
   },
 ];
 

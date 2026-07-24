@@ -23,7 +23,7 @@ toilet paper`;
 const STORE_CLASS: Record<string, string> = {
   walmart: "store-walmart",
   target: "store-target",
-  hyvee: "store-hyvee",
+  aldi: "store-aldi",
 };
 
 function StoreBadge({ storeId, label }: { storeId: string; label: string }) {
@@ -159,8 +159,8 @@ export default function App() {
   const optimizedTotal = matched.reduce((sum, r) => sum + r.bestPrice, 0);
   const allAtWalmart = matched.reduce((sum, r) => sum + r.item.prices.walmart, 0);
   const allAtTarget = matched.reduce((sum, r) => sum + r.item.prices.target, 0);
-  const allAtHyvee = matched.reduce((sum, r) => sum + r.item.prices.hyvee, 0);
-  const singleStoreBest = Math.min(allAtWalmart, allAtTarget, allAtHyvee);
+  const allAtAldi = matched.reduce((sum, r) => sum + r.item.prices.aldi, 0);
+  const singleStoreBest = Math.min(allAtWalmart, allAtTarget, allAtAldi);
   const multiStoreSavings = Number(
     Math.max(0, singleStoreBest - optimizedTotal).toFixed(2),
   );
@@ -195,7 +195,7 @@ export default function App() {
           <p className="brand">ROC Aisle</p>
           <h1>Buy each item where Rochester is cheapest.</h1>
           <p className="lede">
-            Paste your grocery list. We’ll pick Walmart, Target, or Hy-Vee for
+            Paste your grocery list. We’ll pick Walmart, Target, or Aldi for
             every line — prices tuned to {CITY} ({ZIP}).
           </p>
         </motion.div>
@@ -268,8 +268,8 @@ export default function App() {
                   </span>
                 </div>
                 <div className="total-block">
-                  <span className="total-label">All Hy-Vee</span>
-                  <span className="total-value">{formatMoney(allAtHyvee)}</span>
+                  <span className="total-label">All Aldi</span>
+                  <span className="total-value">{formatMoney(allAtAldi)}</span>
                 </div>
               </div>
 
@@ -397,10 +397,11 @@ export default function App() {
             )}
 
             <p className="footnote">
-              Prices are illustrative Rochester, MN shelf estimates for
-              demo matching — not live store feeds. Update{" "}
-              <code>src/data/prices.ts</code> from weekly ads or store apps for
-              accuracy.
+              Aldi includes live Instacart samples for ZIP {ZIP} (milk, butter,
+              chicken) from 2026-07-24. Other Aldi rows are estimated.
+              Walmart/Target remain illustrative — ZIP-aware scrapers are still
+              blocked. Refresh via{" "}
+              <code>docs/APIFY_EXPERIMENT.md</code>.
             </p>
           </motion.main>
         )}

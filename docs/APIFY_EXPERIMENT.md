@@ -2,6 +2,25 @@
 
 Goal: spend roughly **$0–15** (ideally under the Apify free **$5/mo** credits) to pull real search prices for a few staples and compare them to our catalog.
 
+## ZIP-aware options (tested 2026-07-24)
+
+| Source | ZIP-aware? | Result on free plan |
+|---|---|---|
+| `junipr/walmart-scraper` | Yes (`zipCode` + `storeId`) | **Blocked** by PerimeterX |
+| `elliotpadfield/target-scraper` | Yes (`storeId`/`zip`/`state`) | **Blocked** (403/captcha); Rochester Target is store **1351** |
+| `albertfj1114/instacart-grocery-scraper` + **Aldi** | Yes (`zipCode: "55901"`) | **Works** — real local prices |
+| Hy-Vee / Cub on that Instacart actor | — | Not in allowed store list |
+
+### Aldi Instacart probe (working)
+
+```bash
+# Example via Apify Console or client — store slug "aldi", zip 55901
+```
+
+Live samples applied to the app catalog: milk **$3.99**, butter **$6.85**, chicken **$7.94/lb**.
+
+Search matching on Aldi is noisy (queries often return adjacent products), so treat results as local price signals and review titles before trusting a match.
+
 ## Important limitation
 
 The cheapest TrueFetch actors:
