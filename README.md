@@ -1,6 +1,6 @@
 # ROC Aisle
 
-Rochester, MN grocery price helper. Paste a shopping list and get a per-item recommendation for **Walmart**, **Target**, or **Aldi** based on price — plus a split-store trip plan.
+Rochester, MN grocery price helper. Paste a shopping list and get a per-item recommendation for **Walmart**, **Target**, **Aldi**, **Costco**, or **CVS** based on price — plus a split-store trip plan.
 
 ## Run locally
 
@@ -39,8 +39,9 @@ Push to `main` and the Actions workflow deploys to:
 
 See [docs/APIFY_EXPERIMENT.md](docs/APIFY_EXPERIMENT.md).
 
-**Working today:** Instacart ZIP-aware Aldi prices for `55901`.  
-**Blocked on free plan:** Walmart ZIP scrapers (PerimeterX), Target ZIP/RedSky scrapers (403/captcha).
+**Working today:** Instacart ZIP-aware prices for `55901` at **Aldi**, **Costco**, and **CVS** (local Rochester stores).  
+**Blocked on free plan:** Walmart ZIP scrapers (PerimeterX), Target ZIP/RedSky scrapers (403/captcha).  
+**Skipped:** Safeway/Kroger/Sprouts ZIP hits without local Rochester stores; Trader Joe’s Instacart scrape failed.
 
 ```bash
 cp .env.example .env   # add APIFY_TOKEN

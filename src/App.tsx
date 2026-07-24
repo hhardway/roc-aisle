@@ -31,6 +31,8 @@ const STORE_CLASS: Record<string, string> = {
   walmart: "store-walmart",
   target: "store-target",
   aldi: "store-aldi",
+  costco: "store-costco",
+  cvs: "store-cvs",
 };
 
 function StoreBadge({ storeId, label }: { storeId: string; label: string }) {
@@ -192,10 +194,14 @@ export default function App() {
   const matched = results.filter((r) => r.status === "matched") as MatchedResult[];
   const unmatched = results.filter((r) => r.status === "unmatched");
   const optimizedTotal = matched.reduce((sum, r) => sum + r.bestPrice, 0);
-  const allAtWalmart = matched.reduce((sum, r) => sum + r.item.prices.walmart, 0);
-  const allAtTarget = matched.reduce((sum, r) => sum + r.item.prices.target, 0);
-  const allAtAldi = matched.reduce((sum, r) => sum + r.item.prices.aldi, 0);
-  const singleStoreBest = Math.min(allAtWalmart, allAtTarget, allAtAldi);
+  const singleStoreTotals = STORES.map((store) => ({
+    store,
+    total: matched.reduce((sum, r) => sum + r.item.prices[store.id], 0),
+  }));
+  const singleStoreBest = Math.min(
+    ...singleStoreTotals.map((s) => s.total),
+    Number.POSITIVE_INFINITY,
+  );
   const multiStoreSavings = Number(
     Math.max(0, singleStoreBest - optimizedTotal).toFixed(2),
   );
@@ -230,8 +236,8 @@ export default function App() {
           <p className="brand">ROC Aisle</p>
           <h1>Buy each item where Rochester is cheapest.</h1>
           <p className="lede">
-            Paste your grocery list. We’ll pick Walmart, Target, or Aldi for
-            every line — prices tuned to {CITY} ({ZIP}).
+            Paste your grocery list. We’ll pick Walmart, Target, Aldi, Costco, or
+            CVS for every line — prices tuned to {CITY} ({ZIP}).
           </p>
         </motion.div>
 
@@ -293,16 +299,19 @@ export default function App() {
                 <ul className="data-quality-list">
                   <li>
                     <span className="source-badge live">Live</span>
-                    Aldi milk, butter, chicken — Instacart for {CITY} ({ZIP})
+                    Aldi (milk, butter, chicken), Costco (bread, bananas, coffee,
+                    cheese, oil, more), CVS (TP, paper towels, peanut butter) —
+                    Instacart ZIP {ZIP}
                   </li>
                   <li>
                     <span className="source-badge estimated">Est.</span>
-                    All Walmart & Target prices, plus other Aldi items
+                    All Walmart & Target, plus remaining Aldi/Costco/CVS rows
                   </li>
                 </ul>
                 <p className="data-quality-note">
-                  Live samples can differ by brand/size from the catalog name.
-                  Treat “Est.” totals as planning guidance, not shelf guarantees.
+                  Costco live rows are often multipacks (membership warehouse).
+                  CVS grocery search is thin — household staples are more
+                  reliable. Treat “Est.” totals as planning guidance.
                 </p>
               </div>
 
@@ -313,22 +322,12 @@ export default function App() {
                     {formatMoney(optimizedTotal)}
                   </span>
                 </div>
-                <div className="total-block">
-                  <span className="total-label">All Walmart</span>
-                  <span className="total-value">
-                    {formatMoney(allAtWalmart)}
-                  </span>
-                </div>
-                <div className="total-block">
-                  <span className="total-label">All Target</span>
-                  <span className="total-value">
-                    {formatMoney(allAtTarget)}
-                  </span>
-                </div>
-                <div className="total-block">
-                  <span className="total-label">All Aldi</span>
-                  <span className="total-value">{formatMoney(allAtAldi)}</span>
-                </div>
+                {singleStoreTotals.map(({ store, total }) => (
+                  <div className="total-block" key={store.id}>
+                    <span className="total-label">All {store.shortName}</span>
+                    <span className="total-value">{formatMoney(total)}</span>
+                  </div>
+                ))}
               </div>
 
               <div className="view-bar" role="tablist" aria-label="Result layout">

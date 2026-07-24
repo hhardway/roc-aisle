@@ -11,6 +11,8 @@
   --walmart: #0071ce;
   --target: #cc0000;
   --aldi: #00005f;
+  --costco: #e31837;
+  --cvs: #cc0000;
   --best-glow: #2f8f6b;
   --font-display: "Syne", sans-serif;
   --font-body: "Manrope", sans-serif;
@@ -224,7 +226,7 @@ body {
 
 .totals {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 0.75rem;
   margin-bottom: 1.75rem;
 }
@@ -540,6 +542,14 @@ body {
 
 .store-aldi {
   background: var(--aldi);
+}
+
+.store-costco {
+  background: var(--costco);
+}
+
+.store-cvs {
+  background: #cc0000;
 }
 
 .result-list {
