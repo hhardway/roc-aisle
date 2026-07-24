@@ -11,6 +11,7 @@ import {
   buildStoreTrips,
   compareList,
   formatMoney,
+  formatUnitPrice,
   parseList,
   type CompareResult,
   type MatchedResult,
@@ -85,9 +86,8 @@ function ResultRow({
   }
 
   const matched = result as MatchedResult;
-  const bestMeta = matched.prices.find(
-    (p) => p.storeId === matched.bestStoreId,
-  )?.meta;
+  const bestRow = matched.prices.find((p) => p.storeId === matched.bestStoreId);
+  const bestMeta = bestRow?.meta;
 
   return (
     <motion.li
@@ -99,8 +99,8 @@ function ResultRow({
       <div className="result-main">
         <p className="result-query">{matched.item.name}</p>
         <p className="result-meta">
-          “{matched.query}” → {matched.matchLabel} ({matched.matchScore}) ·{" "}
-          {matched.item.unit}
+          “{matched.query}” → {matched.matchLabel} ({matched.matchScore}) ·
+          ranked by price / {matched.item.unit}
         </p>
         <div className="price-strip" aria-label="Prices by store">
           {matched.prices.map((p) => (
@@ -113,7 +113,14 @@ function ResultRow({
                 <span className="price-store">{p.storeName}</span>
                 <SourceBadge meta={p.meta} />
               </span>
-              <span className="price-amount">{formatMoney(p.price)}</span>
+              <span className="price-amount">
+                {formatUnitPrice(p.unitPrice, matched.item.unit)}
+              </span>
+              {p.packQty > 1 && (
+                <span className="price-shelf">
+                  {formatMoney(p.shelfPrice)} shelf · {p.packLabel}
+                </span>
+              )}
             </span>
           ))}
         </div>
@@ -129,9 +136,19 @@ function ResultRow({
             matched.bestStoreId
           }
         />
-        <p className="pick-price">{formatMoney(matched.bestPrice)}</p>
-        {matched.savingsVsWorst > 0 && (
-          <p className="pick-save">Save {formatMoney(matched.savingsVsWorst)}</p>
+        <p className="pick-price">
+          {formatUnitPrice(matched.bestUnitPrice, matched.item.unit)}
+        </p>
+        {bestRow && bestRow.packQty > 1 && (
+          <p className="pick-shelf">
+            Pay {formatMoney(bestRow.shelfPrice)} for {bestRow.packLabel}
+          </p>
+        )}
+        {matched.savingsVsWorstPerUnit > 0 && (
+          <p className="pick-save">
+            Save {formatMoney(matched.savingsVsWorstPerUnit)} /{" "}
+            {matched.item.unit}
+          </p>
         )}
       </div>
     </motion.li>
@@ -153,7 +170,14 @@ function tripToPlainText(trip: {
     ...trip.items.map((item) => {
       const bestRow = item.prices.find((p) => p.storeId === item.bestStoreId);
       const tag = bestRow?.meta.source === "live" ? " [live]" : " [est.]";
-      return `☐ ${item.item.name} — ${formatMoney(item.bestPrice)}${tag}`;
+      const unitBit = bestRow
+        ? ` (${formatUnitPrice(bestRow.unitPrice, item.item.unit)})`
+        : "";
+      const shelf =
+        bestRow && bestRow.packQty > 1
+          ? `${formatMoney(bestRow.shelfPrice)} for ${bestRow.packLabel}`
+          : formatMoney(item.bestShelfPrice);
+      return `☐ ${item.item.name} — ${shelf}${unitBit}${tag}`;
     }),
     "",
     `Subtotal: ${formatMoney(trip.subtotal)}`,
@@ -193,10 +217,19 @@ export default function App() {
   const trips = useMemo(() => buildStoreTrips(results), [results]);
   const matched = results.filter((r) => r.status === "matched") as MatchedResult[];
   const unmatched = results.filter((r) => r.status === "unmatched");
-  const optimizedTotal = matched.reduce((sum, r) => sum + r.bestPrice, 0);
+  const optimizedTotal = Number(
+    matched.reduce((sum, r) => sum + r.bestUnitPrice, 0).toFixed(2),
+  );
   const singleStoreTotals = STORES.map((store) => ({
     store,
-    total: matched.reduce((sum, r) => sum + r.item.prices[store.id], 0),
+    total: Number(
+      matched
+        .reduce((sum, r) => {
+          const row = r.prices.find((p) => p.storeId === store.id);
+          return sum + (row?.unitPrice ?? r.item.prices[store.id]);
+        }, 0)
+        .toFixed(2),
+    ),
   }));
   const singleStoreBest = Math.min(
     ...singleStoreTotals.map((s) => s.total),
@@ -283,9 +316,9 @@ export default function App() {
             <section className="summary" aria-labelledby="summary-heading">
               <h2 id="summary-heading">Split-store plan</h2>
               <p className="section-lede">
-                Shop the cheapest shelf for each item
+                Shop the best price per unit for each item
                 {multiStoreSavings > 0
-                  ? ` — about ${formatMoney(multiStoreSavings)} less than one store.`
+                  ? ` — about ${formatMoney(multiStoreSavings)} less per unit set than one store.`
                   : "."}
               </p>
 
@@ -309,15 +342,15 @@ export default function App() {
                   </li>
                 </ul>
                 <p className="data-quality-note">
-                  Costco live rows are often multipacks (membership warehouse).
-                  CVS grocery search is thin — household staples are more
-                  reliable. Treat “Est.” totals as planning guidance.
+                  Costco (and some other) rows are multipacks — we rank by
+                  price per catalog unit so bulk isn’t unfairly dinged. Shelf
+                  totals on store lists are what you pay at checkout.
                 </p>
               </div>
 
               <div className="totals">
                 <div className="total-block primary">
-                  <span className="total-label">Optimized total</span>
+                  <span className="total-label">Best $/unit plan</span>
                   <span className="total-value">
                     {formatMoney(optimizedTotal)}
                   </span>
@@ -415,7 +448,22 @@ export default function App() {
                                 )}
                               </span>
                               <span className="check-price">
-                                {formatMoney(item.bestPrice)}
+                                {bestRow && bestRow.packQty > 1 ? (
+                                  <>
+                                    <span className="check-shelf">
+                                      {formatMoney(bestRow.shelfPrice)}
+                                    </span>
+                                    <span className="check-unit">
+                                      {formatUnitPrice(
+                                        bestRow.unitPrice,
+                                        item.item.unit,
+                                      )}{" "}
+                                      · {bestRow.packLabel}
+                                    </span>
+                                  </>
+                                ) : (
+                                  formatMoney(item.bestShelfPrice)
+                                )}
                               </span>
                             </li>
                           );

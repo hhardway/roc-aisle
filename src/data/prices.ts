@@ -52,11 +52,17 @@ export type GroceryItem = {
   id: string;
   name: string;
   aliases: string[];
+  /** Catalog compare unit (loaf, lb, dozen, 24 oz, …) */
   unit: string;
   category: string;
   prices: Record<StoreId, number>;
   /** Per-store provenance. Missing entries default to estimated. */
   priceMeta?: Partial<Record<StoreId, PriceMeta>>;
+  /**
+   * How many `unit`s the shelf price covers at each store.
+   * Missing = 1. Costco estimated rows default to 2 in getPackQty().
+   */
+  packQty?: Partial<Record<StoreId, number>>;
 };
 
 export const PRICE_AS_OF = "2026-07-24";
@@ -66,6 +72,32 @@ export function getPriceMeta(
   storeId: StoreId,
 ): PriceMeta {
   return item.priceMeta?.[storeId] ?? { source: "estimated" };
+}
+
+/** Units covered by the shelf price (bulk packs > 1). */
+export function getPackQty(item: GroceryItem, storeId: StoreId): number {
+  const explicit = item.packQty?.[storeId];
+  if (explicit != null && explicit > 0) return explicit;
+  // Estimated Costco rows are treated as typical 2-packs when unspecified.
+  if (storeId === "costco" && getPriceMeta(item, storeId).source === "estimated") {
+    return 2;
+  }
+  return 1;
+}
+
+export function getUnitPrice(
+  item: GroceryItem,
+  storeId: StoreId,
+): number {
+  const qty = getPackQty(item, storeId);
+  return item.prices[storeId] / qty;
+}
+
+export function formatPackLabel(item: GroceryItem, storeId: StoreId): string {
+  const qty = getPackQty(item, storeId);
+  if (qty === 1) return item.unit;
+  const rounded = Number.isInteger(qty) ? String(qty) : qty.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+  return `${rounded} × ${item.unit}`;
 }
 
 export function countLivePrices(): number {
@@ -110,6 +142,7 @@ export const CATALOG: GroceryItem[] = [
     category: "Bakery",
     prices: { walmart: 1.98, target: 2.49, aldi: 1.82, costco: 6.71, cvs: 2.87 },
     priceMeta: { costco: { source: "live", label: "Instacart Costco · Sara Lee whole grain white 2×20 oz" } },
+    packQty: { costco: 2 },
   },
   {
     id: "butter-lb",
@@ -128,6 +161,7 @@ export const CATALOG: GroceryItem[] = [
     category: "Produce",
     prices: { walmart: 0.54, target: 0.59, aldi: 0.5, costco: 2.72, cvs: 0.78 },
     priceMeta: { costco: { source: "live", label: "Instacart Costco · Organic bananas 3 lb" } },
+    packQty: { costco: 3 },
   },
   {
     id: "apples",
@@ -144,7 +178,14 @@ export const CATALOG: GroceryItem[] = [
     unit: "lb",
     category: "Meat",
     prices: { walmart: 3.47, target: 3.99, aldi: 7.94, costco: 14.92, cvs: 5.03 },
-    priceMeta: { aldi: { source: "live", label: "Instacart Aldi · seasoned chicken / lb" }, costco: { source: "live", label: "Instacart Costco · grilled chipotle chicken 2 lb" } },
+    priceMeta: {
+      aldi: { source: "live", label: "Instacart Aldi · seasoned chicken / lb" },
+      costco: {
+        source: "live",
+        label: "Instacart Costco · grilled chipotle chicken 2 lb",
+      },
+    },
+    packQty: { costco: 2 },
   },
   {
     id: "ground-beef",
@@ -178,6 +219,7 @@ export const CATALOG: GroceryItem[] = [
     category: "Pantry",
     prices: { walmart: 1.74, target: 1.99, aldi: 1.6, costco: 12.05, cvs: 2.52 },
     priceMeta: { costco: { source: "live", label: "Instacart Costco · Rao's marinara 2×31.7 oz" } },
+    packQty: { costco: 2.64 },
   },
   {
     id: "cereal",
@@ -195,6 +237,7 @@ export const CATALOG: GroceryItem[] = [
     category: "Pantry",
     prices: { walmart: 5.48, target: 6.29, aldi: 5.04, costco: 23.0, cvs: 7.95 },
     priceMeta: { costco: { source: "live", label: "Instacart Costco · Mayorga Organic Artesano 32 oz" } },
+    packQty: { costco: 2.67 },
   },
   {
     id: "orange-juice",
@@ -212,6 +255,7 @@ export const CATALOG: GroceryItem[] = [
     category: "Dairy",
     prices: { walmart: 4.48, target: 4.99, aldi: 4.12, costco: 24.87, cvs: 6.5 },
     priceMeta: { costco: { source: "live", label: "Instacart Costco · Chobani protein drink 12-pack" } },
+    packQty: { costco: 12 },
   },
   {
     id: "cheese",
@@ -221,6 +265,7 @@ export const CATALOG: GroceryItem[] = [
     category: "Dairy",
     prices: { walmart: 2.28, target: 2.49, aldi: 2.1, costco: 10.69, cvs: 3.31 },
     priceMeta: { costco: { source: "live", label: "Instacart Costco · Castello Havarti slices 32 oz" } },
+    packQty: { costco: 4 },
   },
   {
     id: "potatoes",
@@ -261,7 +306,14 @@ export const CATALOG: GroceryItem[] = [
     unit: "16 oz",
     category: "Pantry",
     prices: { walmart: 2.48, target: 2.79, aldi: 2.28, costco: 9.57, cvs: 4.19 },
-    priceMeta: { costco: { source: "live", label: "Instacart Costco · Skippy creamy 2×48 oz" }, cvs: { source: "live", label: "Instacart CVS · Skippy reduced fat 16.3 oz" } },
+    priceMeta: {
+      costco: { source: "live", label: "Instacart Costco · Skippy creamy 2×48 oz" },
+      cvs: {
+        source: "live",
+        label: "Instacart CVS · Skippy reduced fat 16.3 oz",
+      },
+    },
+    packQty: { costco: 6 },
   },
   {
     id: "jelly",
@@ -279,6 +331,7 @@ export const CATALOG: GroceryItem[] = [
     category: "Household",
     prices: { walmart: 6.97, target: 7.49, aldi: 6.41, costco: 15.33, cvs: 16.79 },
     priceMeta: { cvs: { source: "live", label: "Instacart CVS · Angel Soft 12 ct" } },
+    packQty: { cvs: 1 },
   },
   {
     id: "paper-towels",
@@ -288,6 +341,7 @@ export const CATALOG: GroceryItem[] = [
     category: "Household",
     prices: { walmart: 7.98, target: 8.49, aldi: 7.34, costco: 17.56, cvs: 19.49 },
     priceMeta: { cvs: { source: "live", label: "Instacart CVS · Brawny Tear-A-Square 6 double rolls" } },
+    packQty: { cvs: 1 },
   },
   {
     id: "dish-soap",
@@ -401,6 +455,7 @@ export const CATALOG: GroceryItem[] = [
     category: "Pantry",
     prices: { walmart: 5.98, target: 6.49, aldi: 5.5, costco: 27.36, cvs: 8.67 },
     priceMeta: { costco: { source: "live", label: "Instacart Costco · Kirkland EVOO 2 L" } },
+    packQty: { costco: 3.98 },
   },
   {
     id: "cereal-bars",

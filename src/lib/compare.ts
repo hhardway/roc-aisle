@@ -1,7 +1,10 @@
 import {
   CATALOG,
   STORES,
+  formatPackLabel,
+  getPackQty,
   getPriceMeta,
+  getUnitPrice,
   type GroceryItem,
   type PriceMeta,
   type StoreId,
@@ -10,7 +13,14 @@ import {
 export type PriceRow = {
   storeId: StoreId;
   storeName: string;
-  price: number;
+  /** What you pay at checkout for the pack/item */
+  shelfPrice: number;
+  /** How many catalog units are in that shelf price */
+  packQty: number;
+  /** shelfPrice / packQty — used for ranking */
+  unitPrice: number;
+  /** e.g. "2 × loaf" or "lb" */
+  packLabel: string;
   meta: PriceMeta;
 };
 
@@ -20,8 +30,12 @@ export type MatchedResult = {
   item: GroceryItem;
   prices: PriceRow[];
   bestStoreId: StoreId;
-  bestPrice: number;
-  savingsVsWorst: number;
+  /** Best unit price among stores */
+  bestUnitPrice: number;
+  /** Shelf price at the best unit-price store */
+  bestShelfPrice: number;
+  /** Unit-price gap vs worst store (per catalog unit) */
+  savingsVsWorstPerUnit: number;
   matchScore: number;
   matchLabel: string;
 };
@@ -131,12 +145,19 @@ export function compareList(queries: string[]): CompareResult[] {
 
     const { item, score } = found;
 
-    const prices: PriceRow[] = STORES.map((store) => ({
-      storeId: store.id,
-      storeName: store.name,
-      price: item.prices[store.id],
-      meta: getPriceMeta(item, store.id),
-    })).sort((a, b) => a.price - b.price);
+    const prices: PriceRow[] = STORES.map((store) => {
+      const shelfPrice = item.prices[store.id];
+      const packQty = getPackQty(item, store.id);
+      return {
+        storeId: store.id,
+        storeName: store.name,
+        shelfPrice,
+        packQty,
+        unitPrice: Number((shelfPrice / packQty).toFixed(4)),
+        packLabel: formatPackLabel(item, store.id),
+        meta: getPriceMeta(item, store.id),
+      };
+    }).sort((a, b) => a.unitPrice - b.unitPrice);
 
     const best = prices[0];
     const worst = prices[prices.length - 1];
@@ -147,8 +168,11 @@ export function compareList(queries: string[]): CompareResult[] {
       item,
       prices,
       bestStoreId: best.storeId,
-      bestPrice: best.price,
-      savingsVsWorst: Number((worst.price - best.price).toFixed(2)),
+      bestUnitPrice: best.unitPrice,
+      bestShelfPrice: best.shelfPrice,
+      savingsVsWorstPerUnit: Number(
+        (worst.unitPrice - best.unitPrice).toFixed(2),
+      ),
       matchScore: Math.round(score),
       matchLabel: matchLabel(score),
     };
@@ -160,6 +184,7 @@ export type StoreTrip = {
   storeName: string;
   location: string;
   items: MatchedResult[];
+  /** Checkout total (shelf prices) */
   subtotal: number;
   liveCount: number;
 };
@@ -171,7 +196,7 @@ export function buildStoreTrips(results: CompareResult[]): StoreTrip[] {
 
   return STORES.map((store) => {
     const items = matched.filter((r) => r.bestStoreId === store.id);
-    const subtotal = items.reduce((sum, r) => sum + r.bestPrice, 0);
+    const subtotal = items.reduce((sum, r) => sum + r.bestShelfPrice, 0);
     const liveCount = items.filter((r) => {
       const row = r.prices.find((p) => p.storeId === store.id);
       return row?.meta.source === "live";
@@ -194,4 +219,8 @@ export function formatMoney(n: number): string {
   }).format(n);
 }
 
-export { scoreMatch };
+export function formatUnitPrice(n: number, unit: string): string {
+  return `${formatMoney(n)} / ${unit}`;
+}
+
+export { scoreMatch, getUnitPrice };

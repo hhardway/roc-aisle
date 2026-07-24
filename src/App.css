@@ -479,9 +479,22 @@ body {
 }
 
 .check-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
+  text-align: right;
   white-space: nowrap;
+}
+
+.check-unit {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  white-space: normal;
+  max-width: 11rem;
 }
 
 .store-list-total {
@@ -622,6 +635,19 @@ body {
 
 .price-amount {
   font-weight: 700;
+}
+
+.price-shelf {
+  font-size: 0.68rem;
+  line-height: 1.25;
+  color: var(--ink-soft);
+  max-width: 8.5rem;
+}
+
+.pick-shelf {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
 }
 
 .result-pick {
