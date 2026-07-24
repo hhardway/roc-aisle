@@ -1,6 +1,12 @@
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CITY, STORES, ZIP } from "./data/prices";
+import {
+  CITY,
+  PRICE_AS_OF,
+  STORES,
+  ZIP,
+  countLivePrices,
+} from "./data/prices";
 import {
   buildStoreTrips,
   compareList,
@@ -8,6 +14,7 @@ import {
   parseList,
   type CompareResult,
   type MatchedResult,
+  type PriceRow,
 } from "./lib/compare";
 import "./App.css";
 
@@ -29,6 +36,21 @@ const STORE_CLASS: Record<string, string> = {
 function StoreBadge({ storeId, label }: { storeId: string; label: string }) {
   return (
     <span className={`store-badge ${STORE_CLASS[storeId] ?? ""}`}>{label}</span>
+  );
+}
+
+function SourceBadge({ meta }: { meta: PriceRow["meta"] }) {
+  if (meta.source === "live") {
+    return (
+      <span className="source-badge live" title={meta.label ?? "Live price"}>
+        Live
+      </span>
+    );
+  }
+  return (
+    <span className="source-badge estimated" title="Estimated catalog price">
+      Est.
+    </span>
   );
 }
 
@@ -61,6 +83,9 @@ function ResultRow({
   }
 
   const matched = result as MatchedResult;
+  const bestMeta = matched.prices.find(
+    (p) => p.storeId === matched.bestStoreId,
+  )?.meta;
 
   return (
     <motion.li
@@ -72,19 +97,27 @@ function ResultRow({
       <div className="result-main">
         <p className="result-query">{matched.item.name}</p>
         <p className="result-meta">
-          Matched from “{matched.query}” · {matched.item.unit}
+          “{matched.query}” → {matched.matchLabel} ({matched.matchScore}) ·{" "}
+          {matched.item.unit}
         </p>
         <div className="price-strip" aria-label="Prices by store">
           {matched.prices.map((p) => (
             <span
               key={p.storeId}
               className={`price-chip ${p.storeId === matched.bestStoreId ? "best" : ""}`}
+              title={p.meta.label ?? undefined}
             >
-              <span className="price-store">{p.storeName}</span>
+              <span className="price-store-row">
+                <span className="price-store">{p.storeName}</span>
+                <SourceBadge meta={p.meta} />
+              </span>
               <span className="price-amount">{formatMoney(p.price)}</span>
             </span>
           ))}
         </div>
+        {bestMeta?.source === "live" && bestMeta.label && (
+          <p className="live-note">{bestMeta.label}</p>
+        )}
       </div>
       <div className="result-pick">
         <StoreBadge
@@ -115,9 +148,11 @@ function tripToPlainText(trip: {
     trip.storeName,
     trip.location,
     "",
-    ...trip.items.map(
-      (item) => `☐ ${item.item.name} — ${formatMoney(item.bestPrice)}`,
-    ),
+    ...trip.items.map((item) => {
+      const bestRow = item.prices.find((p) => p.storeId === item.bestStoreId);
+      const tag = bestRow?.meta.source === "live" ? " [live]" : " [est.]";
+      return `☐ ${item.item.name} — ${formatMoney(item.bestPrice)}${tag}`;
+    }),
     "",
     `Subtotal: ${formatMoney(trip.subtotal)}`,
   ];
@@ -248,6 +283,29 @@ export default function App() {
                   : "."}
               </p>
 
+              <div className="data-quality" aria-label="Price data quality">
+                <div className="data-quality-head">
+                  <h3>Price validity</h3>
+                  <p>
+                    {countLivePrices()} live · as of {PRICE_AS_OF} · ZIP {ZIP}
+                  </p>
+                </div>
+                <ul className="data-quality-list">
+                  <li>
+                    <span className="source-badge live">Live</span>
+                    Aldi milk, butter, chicken — Instacart for {CITY} ({ZIP})
+                  </li>
+                  <li>
+                    <span className="source-badge estimated">Est.</span>
+                    All Walmart & Target prices, plus other Aldi items
+                  </li>
+                </ul>
+                <p className="data-quality-note">
+                  Live samples can differ by brand/size from the catalog name.
+                  Treat “Est.” totals as planning guidance, not shelf guarantees.
+                </p>
+              </div>
+
               <div className="totals">
                 <div className="total-block primary">
                   <span className="total-label">Optimized total</span>
@@ -345,18 +403,33 @@ export default function App() {
                       </div>
 
                       <ol className="store-checklist">
-                        {trip.items.map((item) => (
-                          <li key={item.item.id}>
-                            <span className="check-name">{item.item.name}</span>
-                            <span className="check-price">
-                              {formatMoney(item.bestPrice)}
-                            </span>
-                          </li>
-                        ))}
+                        {trip.items.map((item) => {
+                          const bestRow = item.prices.find(
+                            (p) => p.storeId === item.bestStoreId,
+                          );
+                          return (
+                            <li key={item.item.id}>
+                              <span className="check-name">
+                                {item.item.name}
+                                {bestRow && (
+                                  <SourceBadge meta={bestRow.meta} />
+                                )}
+                              </span>
+                              <span className="check-price">
+                                {formatMoney(item.bestPrice)}
+                              </span>
+                            </li>
+                          );
+                        })}
                       </ol>
 
                       <p className="store-list-total">
-                        <span>Store subtotal</span>
+                        <span>
+                          Store subtotal
+                          {trip.liveCount > 0
+                            ? ` · ${trip.liveCount} live`
+                            : " · all estimated"}
+                        </span>
                         <strong>{formatMoney(trip.subtotal)}</strong>
                       </p>
                     </motion.article>
@@ -382,7 +455,9 @@ export default function App() {
               <section className="item-results" aria-labelledby="items-heading">
                 <h2 id="items-heading">Where to buy each item</h2>
                 <p className="section-lede">
-                  Green marks the lowest Rochester price for that line.
+                  Green marks the lowest price. Each chip shows whether that
+                  store’s number is <span className="source-badge live">Live</span>{" "}
+                  or <span className="source-badge estimated">Est.</span>
                 </p>
                 <ul className="result-list">
                   {results.map((result, i) => (
@@ -397,11 +472,10 @@ export default function App() {
             )}
 
             <p className="footnote">
-              Aldi includes live Instacart samples for ZIP {ZIP} (milk, butter,
-              chicken) from 2026-07-24. Other Aldi rows are estimated.
-              Walmart/Target remain illustrative — ZIP-aware scrapers are still
-              blocked. Refresh via{" "}
-              <code>docs/APIFY_EXPERIMENT.md</code>.
+              Matching uses alias + fuzzy scoring in{" "}
+              <code>src/lib/compare.ts</code> (exact → prefix → contains → token
+              overlap; needs score ≥ 45). Price sources live in{" "}
+              <code>src/data/prices.ts</code>.
             </p>
           </motion.main>
         )}

@@ -28,6 +28,14 @@ export const STORES: Store[] = [
   },
 ];
 
+export type PriceSource = "live" | "estimated";
+
+export type PriceMeta = {
+  source: PriceSource;
+  /** Short label shown in the UI for live samples */
+  label?: string;
+};
+
 export type GroceryItem = {
   id: string;
   name: string;
@@ -35,7 +43,28 @@ export type GroceryItem = {
   unit: string;
   category: string;
   prices: Record<StoreId, number>;
+  /** Per-store provenance. Missing entries default to estimated. */
+  priceMeta?: Partial<Record<StoreId, PriceMeta>>;
 };
+
+export const PRICE_AS_OF = "2026-07-24";
+
+export function getPriceMeta(
+  item: GroceryItem,
+  storeId: StoreId,
+): PriceMeta {
+  return item.priceMeta?.[storeId] ?? { source: "estimated" };
+}
+
+export function countLivePrices(): number {
+  return CATALOG.reduce((n, item) => {
+    if (!item.priceMeta) return n;
+    return (
+      n +
+      Object.values(item.priceMeta).filter((m) => m?.source === "live").length
+    );
+  }, 0);
+}
 
 /**
  * Rochester, MN prices (USD).
@@ -50,6 +79,7 @@ export const CATALOG: GroceryItem[] = [
     unit: "gallon",
     category: "Dairy",
     prices: { walmart: 3.28, target: 3.49, aldi: 3.99 },
+    priceMeta: { aldi: { source: "live", label: "Instacart Aldi · Friendly Farms 2% ultra-filtered" } },
   },
   {
     id: "eggs-dozen",
@@ -74,6 +104,7 @@ export const CATALOG: GroceryItem[] = [
     unit: "lb",
     category: "Dairy",
     prices: { walmart: 3.98, target: 4.29, aldi: 6.85 },
+    priceMeta: { aldi: { source: "live", label: "Instacart Aldi · Simply Nature organic salted 16 oz" } },
   },
   {
     id: "bananas",
@@ -98,6 +129,7 @@ export const CATALOG: GroceryItem[] = [
     unit: "lb",
     category: "Meat",
     prices: { walmart: 3.47, target: 3.99, aldi: 7.94 },
+    priceMeta: { aldi: { source: "live", label: "Instacart Aldi · seasoned chicken / lb" } },
   },
   {
     id: "ground-beef",
