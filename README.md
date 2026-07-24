@@ -35,6 +35,15 @@ Push to `main` and the Actions workflow deploys to:
 
 `netlify.toml` is already in the repo.
 
+## Live price experiment (Apify)
+
+See [docs/APIFY_EXPERIMENT.md](docs/APIFY_EXPERIMENT.md) for a ~$1–5 Walmart + Target probe using free Apify credits.
+
+```bash
+cp .env.example .env   # add APIFY_TOKEN
+npm run probe:apify
+```
+
 ## How it works
 
 1. Enter items one per line (or comma-separated).

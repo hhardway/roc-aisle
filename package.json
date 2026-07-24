@@ -8,9 +8,11 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "build:pages": "GITHUB_PAGES=true npm run build"
+    "build:pages": "GITHUB_PAGES=true npm run build",
+    "probe:apify": "node scripts/apify-price-probe.mjs"
   },
   "dependencies": {
+    "apify-client": "^2.23.4",
     "framer-motion": "^12.42.2",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
