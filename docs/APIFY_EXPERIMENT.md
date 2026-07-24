@@ -86,11 +86,27 @@ In Apify Console, open `junipr/walmart-scraper` and run with:
   "storeId": "1971",
   "zipCode": "55901",
   "sortBy": "price_low",
-  "maxChargeUsd": 2
+  "maxChargeUsd": 2,
+  "proxyConfiguration": {
+    "useApifyProxy": true,
+    "apifyProxyGroups": ["RESIDENTIAL"]
+  }
 }
 ```
 
 Rochester NW Supercenter: **store 1971**, ZIP **55901**.
+
+#### Trial result (2026-07-24)
+
+We ran this on the free plan (~$4.45 credits remaining after earlier TrueFetch runs):
+
+1. Datacenter proxy → **blocked** by Walmart PerimeterX (0 products)
+2. Residential proxy group → still **blocked**; actor status:  
+   `BLOCKED_BY_ANTIBOT … Upgrade to a paid Apify plan or provide your own proxy URL`
+
+Cost of both ZIP trials: ~**$0.05** total. Credits remaining: ~**$4.43 / $5**.
+
+So ZIP-aware Walmart scraping is **not workable on Apify free** right now for this actor. Next options: Apify paid tier / better residential proxies, a different Walmart actor, or manual / weekly-ad updates for Rochester.
 
 ### 6. Decide what “good enough” means
 
