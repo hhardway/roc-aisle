@@ -103,10 +103,50 @@ function ResultRow({
   );
 }
 
+type ViewMode = "by-item" | "by-store";
+
+function tripToPlainText(trip: {
+  storeName: string;
+  location: string;
+  subtotal: number;
+  items: MatchedResult[];
+}): string {
+  const lines = [
+    trip.storeName,
+    trip.location,
+    "",
+    ...trip.items.map(
+      (item) => `☐ ${item.item.name} — ${formatMoney(item.bestPrice)}`,
+    ),
+    "",
+    `Subtotal: ${formatMoney(trip.subtotal)}`,
+  ];
+  return lines.join("\n");
+}
+
+function allTripsToPlainText(
+  trips: ReturnType<typeof buildStoreTrips>,
+  unmatched: CompareResult[],
+): string {
+  const blocks = trips.map(tripToPlainText);
+  if (unmatched.length > 0) {
+    blocks.push(
+      [
+        "Unmatched (add manually)",
+        "",
+        ...unmatched.map((r) => `☐ ${r.query}`),
+      ].join("\n"),
+    );
+  }
+  return blocks.join("\n\n———\n\n");
+}
+
 export default function App() {
   const [rawList, setRawList] = useState(SAMPLE_LIST);
   const [submitted, setSubmitted] = useState(SAMPLE_LIST);
   const [hasRun, setHasRun] = useState(true);
+  const [viewMode, setViewMode] = useState<ViewMode>("by-store");
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   const results = useMemo(
     () => (hasRun ? compareList(parseList(submitted)) : []),
@@ -115,6 +155,7 @@ export default function App() {
 
   const trips = useMemo(() => buildStoreTrips(results), [results]);
   const matched = results.filter((r) => r.status === "matched") as MatchedResult[];
+  const unmatched = results.filter((r) => r.status === "unmatched");
   const optimizedTotal = matched.reduce((sum, r) => sum + r.bestPrice, 0);
   const allAtWalmart = matched.reduce((sum, r) => sum + r.item.prices.walmart, 0);
   const allAtTarget = matched.reduce((sum, r) => sum + r.item.prices.target, 0);
@@ -123,6 +164,16 @@ export default function App() {
   const multiStoreSavings = Number(
     Math.max(0, singleStoreBest - optimizedTotal).toFixed(2),
   );
+
+  async function copyText(key: string, text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedKey(key);
+      window.setTimeout(() => setCopiedKey(null), 1800);
+    } catch {
+      setCopiedKey(null);
+    }
+  }
 
   function onCompare(e: React.FormEvent) {
     e.preventDefault();
@@ -222,49 +273,128 @@ export default function App() {
                 </div>
               </div>
 
-              <ul className="trip-list">
-                {trips.map((trip, i) => (
-                  <motion.li
-                    key={trip.storeId}
-                    className="trip"
-                    initial={{ opacity: 0, x: -12 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.08 * i, duration: 0.4 }}
+              <div className="view-bar" role="tablist" aria-label="Result layout">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={viewMode === "by-store"}
+                  className={`view-tab ${viewMode === "by-store" ? "active" : ""}`}
+                  onClick={() => setViewMode("by-store")}
+                >
+                  List by store
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={viewMode === "by-item"}
+                  className={`view-tab ${viewMode === "by-item" ? "active" : ""}`}
+                  onClick={() => setViewMode("by-item")}
+                >
+                  List by item
+                </button>
+                {viewMode === "by-store" && trips.length > 0 && (
+                  <button
+                    type="button"
+                    className="ghost copy-all"
+                    onClick={() =>
+                      copyText("all", allTripsToPlainText(trips, unmatched))
+                    }
                   >
-                    <div className="trip-head">
-                      <StoreBadge
-                        storeId={trip.storeId}
-                        label={trip.storeName}
-                      />
-                      <span className="trip-subtotal">
-                        {formatMoney(trip.subtotal)} · {trip.items.length}{" "}
-                        {trip.items.length === 1 ? "item" : "items"}
-                      </span>
-                    </div>
-                    <p className="trip-loc">{trip.location}</p>
-                    <p className="trip-items">
-                      {trip.items.map((item) => item.item.name).join(" · ")}
-                    </p>
-                  </motion.li>
-                ))}
-              </ul>
+                    {copiedKey === "all" ? "Copied" : "Copy all store lists"}
+                  </button>
+                )}
+              </div>
             </section>
 
-            <section className="item-results" aria-labelledby="items-heading">
-              <h2 id="items-heading">Where to buy each item</h2>
-              <p className="section-lede">
-                Green marks the lowest Rochester price for that line.
-              </p>
-              <ul className="result-list">
-                {results.map((result, i) => (
-                  <ResultRow
-                    key={`${result.query}-${i}`}
-                    result={result}
-                    index={i}
-                  />
-                ))}
-              </ul>
-            </section>
+            {viewMode === "by-store" ? (
+              <section
+                className="store-lists"
+                aria-labelledby="store-lists-heading"
+              >
+                <h2 id="store-lists-heading">Shopping lists by store</h2>
+                <p className="section-lede">
+                  One checklist per stop — copy what you need before you leave.
+                </p>
+
+                <div className="store-list-grid">
+                  {trips.map((trip, i) => (
+                    <motion.article
+                      key={trip.storeId}
+                      className="store-list-card"
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.06 * i, duration: 0.4 }}
+                    >
+                      <div className="store-list-head">
+                        <div>
+                          <StoreBadge
+                            storeId={trip.storeId}
+                            label={trip.storeName}
+                          />
+                          <p className="trip-loc">{trip.location}</p>
+                        </div>
+                        <button
+                          type="button"
+                          className="ghost"
+                          onClick={() =>
+                            copyText(trip.storeId, tripToPlainText(trip))
+                          }
+                        >
+                          {copiedKey === trip.storeId ? "Copied" : "Copy list"}
+                        </button>
+                      </div>
+
+                      <ol className="store-checklist">
+                        {trip.items.map((item) => (
+                          <li key={item.item.id}>
+                            <span className="check-name">{item.item.name}</span>
+                            <span className="check-price">
+                              {formatMoney(item.bestPrice)}
+                            </span>
+                          </li>
+                        ))}
+                      </ol>
+
+                      <p className="store-list-total">
+                        <span>Store subtotal</span>
+                        <strong>{formatMoney(trip.subtotal)}</strong>
+                      </p>
+                    </motion.article>
+                  ))}
+                </div>
+
+                {unmatched.length > 0 && (
+                  <div className="unmatched-block">
+                    <h3>Unmatched items</h3>
+                    <p className="section-lede">
+                      Not in the catalog yet — add these manually wherever you
+                      shop.
+                    </p>
+                    <ul className="unmatched-list">
+                      {unmatched.map((r) => (
+                        <li key={r.query}>{r.query}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </section>
+            ) : (
+              <section className="item-results" aria-labelledby="items-heading">
+                <h2 id="items-heading">Where to buy each item</h2>
+                <p className="section-lede">
+                  Green marks the lowest Rochester price for that line.
+                </p>
+                <ul className="result-list">
+                  {results.map((result, i) => (
+                    <ResultRow
+                      key={`${result.query}-${i}`}
+                      result={result}
+                      index={i}
+                    />
+                  ))}
+                </ul>
+              </section>
+            )}
 
             <p className="footnote">
               Prices are illustrative Rochester, MN shelf estimates for

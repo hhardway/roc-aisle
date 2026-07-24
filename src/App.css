@@ -285,7 +285,7 @@ body {
 }
 
 .trip-loc {
-  margin: 0 0 0.45rem;
+  margin: 0.45rem 0 0;
   font-size: 0.88rem;
   color: var(--ink-soft);
 }
@@ -294,6 +294,134 @@ body {
   margin: 0;
   line-height: 1.5;
   color: var(--ink);
+}
+
+.view-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-top: 1.25rem;
+  border-top: 1.5px solid var(--line);
+}
+
+.view-tab {
+  font: inherit;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: transparent;
+  color: var(--ink-soft);
+  border-radius: var(--radius);
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.view-tab:hover {
+  color: var(--ink);
+  border-color: var(--ink-soft);
+}
+
+.view-tab.active {
+  background: var(--bg-deep);
+  border-color: var(--bg-deep);
+  color: #fff;
+}
+
+.copy-all {
+  margin-left: auto;
+}
+
+.store-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.store-list-card {
+  padding: 1.15rem 1.2rem 1.25rem;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.store-list-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.store-checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.store-checklist li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.store-checklist li:last-child {
+  border-bottom: none;
+}
+
+.check-name {
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.check-price {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.store-list-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0.25rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1.5px solid var(--line);
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+}
+
+.store-list-total strong {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--ink);
+}
+
+.unmatched-block {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1.5px solid var(--line);
+}
+
+.unmatched-block h3 {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
+.unmatched-list {
+  margin: 0;
+  padding-left: 1.15rem;
+  color: var(--ink);
+  line-height: 1.7;
 }
 
 .store-badge {
